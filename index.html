@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NACHIKETH J — Portfolio</title>
+  <meta name="description" content="NACHIKETH J — Web Developer & Designer. Services, works, skills, about, contact." />
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              accent: { 50:'#f0fdfa',100:'#ccfbf1',200:'#99f6e4',300:'#5eead4',400:'#2dd4bf',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a' },
+              sand: '#EFF0EA',
+              ink: '#0a0a0a',
+              mute: '#c9c9bf'
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/CustomEase.min.js"></script>
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23134e4a'/%3E%3Ctext x='50' y='58' font-size='52' text-anchor='middle' fill='%23fff' font-family='Segoe UI, Roboto, Arial, sans-serif'%3EN%3C/text%3E%3C/svg%3E" />
+    <style>
+      .tilt { transform-style: preserve-3d; perspective: 1000px; }
+      .will-change-transform { will-change: transform, opacity; }
+      .gpu { will-change: transform; transform: translateZ(0); backface-visibility: hidden; }
+
+      /* Stacked Sections (CSS + vanilla JS) */
+      :root { --ease-b: cubic-bezier(0.22, 1, 0.36, 1); }
+      .stack-section { position: relative; isolation: isolate; }
+      .stack-section .stack-card {
+        position: sticky;
+        top: 0;
+        height: 88vh;
+        margin-bottom: 12vh; /* ensures total scroll distance ≈ n * 100vh */
+        transform-origin: center top;
+        transition: transform 400ms var(--ease-b), opacity 400ms var(--ease-b), filter 400ms var(--ease-b);
+        will-change: transform, opacity;
+      }
+      /* States manipulated by JS */
+      .stack-section .stack-card { opacity: 1; }
+      .stack-section .stack-card.is-active { transform: scale(1) translateY(0); opacity: 1; filter: none; }
+      .stack-section .stack-card.is-past { transform: scale(0.97) translateY(-1vh); opacity: 1; filter: brightness(0.95) contrast(0.98); }
+
+  /* Large sections: hint the browser to skip rendering until needed */
+  #panelStack > .stack-card, #panelStackB > .stack-card, #works, #contact { content-visibility: auto; contain-intrinsic-size: 1000px 800px; }
+
+  /* When entire sections are cards, reduce the gap so transitions feel continuous */
+  #panelStack > .stack-card, #panelStackB > .stack-card { margin-bottom: 8vh; height: 92vh; }
+
+      /* Respect user preference to reduce motion */
+      @media (prefers-reduced-motion: reduce) {
+        #stackWorks .stack-card { transition: none !important; }
+      }
+  /* Works left nav highlight */
+  .work-nav-item { display:block; text-align:left; font-weight:800; line-height: .9; font-size: clamp(28px, 6vw, 72px); opacity: 0.6; transition: color .2s, opacity .2s, transform .2s; }
+      .work-nav-item.is-current { color: #14b8a6; opacity: 1; transform: translateX(4px); }
+    .work-nav-item.is-current::after { content: ''; display:block; height: 3px; width: 28px; background: #14b8a6; border-radius: 999px; margin-top: 6px; }
+
+    /* Work cards hover polish */
+    .work-preview { transition: transform 500ms var(--ease-b); }
+    .group:hover .work-preview { transform: scale(1.02); }
+    .work-panel { transition: transform 250ms var(--ease-b), box-shadow 250ms var(--ease-b); }
+    .group:hover .work-panel { transform: translateY(-2px); box-shadow: 0 25px 40px -20px rgba(0,0,0,0.35); }
+
+    /* Scroll-to-top button visibility */
+    #toTop { opacity: 0; pointer-events: none; transition: opacity .25s var(--ease-b), transform .25s var(--ease-b); transform: translateY(8px); }
+    #toTop.is-visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    </style>
+  </head>
+
+  <body class="bg-black text-white antialiased selection:bg-accent-500/30">
+    <!-- Scroll progress bar + ToTop button -->
+    <div id="scrollbar" class="fixed left-0 top-0 h-[3px] bg-accent-500/80 w-0 z-[9999]"></div>
+    <button id="toTop" type="button" aria-label="Scroll to top" class="fixed bottom-6 right-6 z-[9999] rounded-full bg-accent-600 text-black font-semibold shadow-lg px-4 py-2 text-sm hover:bg-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-400">Top ↑</button>
+    
+
+    <main id="top">
+  <!-- Stacked panels from Hero -> About (stops before Works) -->
+  <div id="panelStack" class="stack-section">
+  <!-- Hero (light) as panel card -->
+  <section id="hero" class="relative bg-sand text-ink stack-card overflow-hidden">
+        <div class="mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-8">
+          <article class="overflow-hidden">
+          <div class="py-10 sm:py-14 md:py-16 flex items-center justify-between">
+            <p class="text-sm font-medium text-ink/70">Web Developer & Designer</p>
+            <nav class="text-[0.95rem] font-semibold hidden sm:block">
+              <a href="#services" class="text-ink visited:text-ink transition-colors hover:text-accent-700">Services</a>
+              <span class="mx-2 text-ink/50">•</span>
+              <a href="#works" class="text-ink visited:text-ink transition-colors hover:text-accent-700">Works</a>
+              <span class="mx-2 text-ink/50">•</span>
+              <a href="#about" class="text-ink visited:text-ink transition-colors hover:text-accent-700">About</a>
+              <span class="mx-2 text-ink/50">•</span>
+              <a href="#contact" class="text-ink visited:text-ink transition-colors hover:text-accent-700">Contact</a>
+            </nav>
+          </div>
+
+          <h1 class="select-none leading-none tracking-tight font-extrabold text-ink will-change-transform whitespace-nowrap">
+            <span class="block text-[18vw] sm:text-[16vw] md:text-[12.5vw] lg:text-[10.5vw]">NACHIKETH J</span>
+          </h1>
+
+          <div class="mt-6 grid items-start gap-8 pb-16 sm:grid-cols-2 sm:gap-12 md:pb-20">
+            <div class="space-y-6">
+              <div class="inline-flex h-8 w-8 items-center justify-center text-[#7b7e6b]">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 12h12M12 5l7 7-7 7"/></svg>
+              </div>
+              <p class="max-w-xl text-[18px] leading-7 text-ink/80">
+                Open to opportunities worldwide. Passionate about building polished, intuitive, and thoughtful digital experiences that leave a mark.
+              </p>
+              <a href="#contact" id="contactToggle" class="mt-4 group inline-flex items-center gap-3 rounded-full bg-accent-600 pr-4 pl-2 py-2 text-[15px] font-semibold text-black shadow-sm ring-1 ring-black/10 transition hover:bg-accent-500 w-max">
+                <span class="toggle-track relative inline-flex h-6 w-10 items-center rounded-full bg-black/20 ring-1 ring-black/20">
+                  <span class="knob inline-block h-5 w-5 rounded-full bg-black transition-transform translate-x-0 group-hover:translate-x-4"></span>
+                </span>
+                Contact me
+              </a>
+              
+            </div>
+
+            <div class="justify-self-center sm:justify-self-end">
+              <div class="h-[23rem] w-[30rem] max-w-full overflow-hidden rounded-2xl bg-white/70 shadow-sm ring-1 ring-black/10 relative z-10 mt-2 sm:mt-0">
+                <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop" alt="Aesthetic developer workspace" class="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
+              </div>
+            </div>
+          </div>
+          <!-- bottom-right availability overlay -->
+          <div class="pointer-events-none absolute right-6 md:right-10 lg:right-20 bottom-6 md:bottom-8 text-right z-0">
+            <div class="text-[11px] md:text-xs tracking-widest text-ink/60 uppercase">AVAILABLE FOR WORK</div>
+            <div id="availTag" class="leading-[0.88] font-extrabold text-ink text-[16vw] sm:text-[12vw] md:text-[10vw] lg:text-[8.5vw]">JUN'25</div>
+          </div>
+      </article>
+        </div>
+  </section>
+  
+  <!-- WHAT I DO intro (stacked with Hero) -->
+  <section id="servicesIntro" class="stack-card bg-black text-white overflow-hidden">
+    <div class="mx-auto h-full max-w-[92rem] px-4 sm:px-6 lg:px-8">
+      <div class="flex h-full flex-col justify-center py-10 sm:py-14 md:py-16">
+        <h2 class="text-sand text-[14vw] sm:text-[12vw] md:text-[10vw] lg:text-[8.5vw] font-extrabold tracking-tight leading-[0.88]">WHAT I DO<span class="text-white/60"> /</span></h2>
+        <div class="mt-8 md:mt-10 max-w-3xl">
+          <div class="text-xs tracking-widest text-white/50 uppercase mb-3">(Services)</div>
+          <p class="text-white/80 text-xl sm:text-2xl leading-9">
+            I specialize in building full‑stack web applications that are fast, reliable, and user‑friendly. With a solid foundation in both frontend and backend technologies, I help bring ideas to life whether it’s for a business, a startup, or a product team.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  </div>
+
+    <!-- WHAT I DO / (Services) normal flow with its own inner stack -->
+  <section id="services" class="relative bg-black text-white">
+        <div class="mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-8">
+          <div class="py-10 sm:py-12 md:py-14">
+            <div id="stackServices" class="stack-section">
+              <!-- Card 1 -->
+              <article class="stack-card overflow-hidden rounded-2xl bg-black ring-1 ring-white/10">
+                <div class="grid h-full grid-rows-[1fr_auto]">
+                  <div class="p-6 sm:p-8 md:p-12">
+                    <div class="md:grid md:grid-cols-12 md:gap-10">
+                      <div class="md:col-span-7">
+                        <div class="mb-3 text-2xl font-bold text-white/60">(01)</div>
+                        <h3 class="text-4xl sm:text-5xl md:text-6xl font-semibold">Full-Stack Development</h3>
+                        <p class="mt-4 text-white/75 text-lg sm:text-xl max-w-none">I design, build, and maintain production-ready apps with clean architecture, performance, and accessibility.</p>
+                      </div>
+                      <div class="md:col-span-5 md:mt-10">
+                        <ul class="mt-5 grid gap-3 text-white/85 sm:grid-cols-2">
+                          <li class="border-t border-white/10 pt-3 text-base sm:text-lg">Next.js, React, Tailwind</li>
+                          <li class="border-t border-white/10 pt-3 text-base sm:text-lg">Node.js, Python</li>
+                          <li class="border-t border-white/10 pt-3 text-base sm:text-lg">PostgreSQL, Prisma</li>
+                          <li class="border-t border-white/10 pt-3 text-base sm:text-lg">AWS, Docker, CI/CD</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between border-t border-white/10 px-6 py-4 text-sm text-white/60 sm:px-8">
+                    <span>End-to-end delivery</span>
+                    <span>Clean architecture</span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Card 2 -->
+              <article class="stack-card overflow-hidden rounded-2xl bg-black ring-1 ring-white/10">
+                <div class="grid h-full grid-rows-[1fr_auto]">
+                  <div class="p-6 sm:p-8 md:p-12">
+                    <div class="md:grid md:grid-cols-12 md:gap-10">
+                      <div class="md:col-span-7">
+                        <div class="mb-3 text-2xl font-bold text-white/60">(02)</div>
+                        <h3 class="text-4xl sm:text-5xl md:text-6xl font-semibold">UI/UX & Frontend</h3>
+                        <p class="mt-4 text-white/75 text-lg sm:text-xl max-w-none">Clear, responsive user interfaces with micro-interactions and motion that enhance usability.</p>
+                      </div>
+                      <div class="md:col-span-5 md:mt-10">
+                        <ul class="mt-5 grid gap-3 text-white/85 sm:grid-cols-2">
+                          <li class="border-t border-white/10 pt-3 text-base sm:text-lg">Design systems</li>
+                          <li class="border-t border-white/10 pt-3 text-base sm:text-lg">GSAP, Framer Motion</li>
+                          <li class="border-t border-white/10 pt-3 text-base sm:text-lg">A11y & performance</li>
+                          <li class="border-t border-white/10 pt-3 text-base sm:text-lg">Animations & polish</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between border-t border-white/10 px-6 py-4 text-sm text-white/60 sm:px-8">
+                    <span>Design fidelity</span>
+                    <span>Motion with intent</span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Card 3 -->
+              <article class="stack-card overflow-hidden rounded-2xl bg-black ring-1 ring-white/10">
+                <div class="grid h-full grid-rows-[1fr_auto]">
+                  <div class="p-6 sm:p-8 md:p-12">
+                    <div class="md:grid md:grid-cols-12 md:gap-10">
+                      <div class="md:col-span-7">
+                        <div class="mb-3 text-2xl font-bold text-white/60">(03)</div>
+                        <h3 class="text-4xl sm:text-5xl md:text-6xl font-semibold">Automation & DevOps</h3>
+                        <p class="mt-4 text-white/75 text-lg sm:text-xl max-w-none">Automated testing and delivery pipelines to ship quickly and safely.</p>
+                      </div>
+                      <div class="md:col-span-5 md:mt-10">
+                        <ul class="mt-5 grid gap-3 text-white/85 sm:grid-cols-2">
+                          <li class="border-t border-white/10 pt-3 text-base sm:text-lg">CI/CD & GitHub Actions</li>
+                          <li class="border-t border-white/10 pt-3 text-base sm:text-lg">Containers & Infra as Code</li>
+                          <li class="border-t border-white/10 pt-3 text-base sm:text-lg">Monitoring & logging</li>
+                          <li class="border-t border-white/10 pt-3 text-base sm:text-lg">Cloud cost hygiene</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between border-t border-white/10 px-6 py-4 text-sm text-white/60 sm:px-8">
+                    <span>Reliability</span>
+                    <span>Speed to ship</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+  <!-- SELECTED WORKS / (Stacked, sticky-on-scroll, no GSAP) -->
+      <section id="works" class="relative bg-black text-white">
+        <div class="mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-8">
+          <div class="pb-4 pt-4 md:pt-6">
+            <h2 class="mb-2 text-[12vw] sm:text-[10vw] md:text-[8vw] lg:text-[6vw] font-extrabold tracking-tight text-white/90">SELECTED WORKS<span class="text-white/60"> /</span></h2>
+            <p class="mb-8 text-white/55 text-sm sm:text-base">Scroll the stack, tap the numbers, and enjoy tiny previews — it’s like speed‑dating my projects.</p>
+          </div>
+
+          <div class="grid grid-cols-12 gap-6">
+            <!-- Left sticky nav -->
+            <aside class="col-span-12 md:col-span-3">
+              <div id="workNav" class="sticky top-28 space-y-5 text-white/60">
+                <button class="work-nav-item is-current" data-idx="0" type="button">01 →</button>
+                <button class="work-nav-item" data-idx="1" type="button">02 →</button>
+                <button class="work-nav-item" data-idx="2" type="button">03 →</button>
+              </div>
+            </aside>
+
+            <!-- Right stacked cards -->
+            <div class="col-span-12 md:col-span-9">
+              <div id="stackWorks" class="stack-section">
+            <!-- Card 1 -->
+            <article id="work-1" class="stack-card overflow-hidden rounded-2xl bg-black ring-1 ring-white/10 p-3 sm:p-4 md:p-6">
+              <div class="work-panel relative h-full w-full md:w-[92%] md:ml-auto rounded-[24px] bg-white text-ink ring-1 ring-black/10 shadow-xl overflow-hidden">
+                <!-- Clickable video preview: FlowEdge live link + local preview assets -->
+                <a href="https://shadow-monarch007.github.io/FlowEdge/pages/landing_page.html" target="_blank" rel="noreferrer" class="absolute inset-0 block group">
+                  <video class="work-preview absolute inset-0 h-full w-full object-cover md:object-right" muted playsinline loop autoplay preload="metadata" poster="assets/works/work1.png" aria-hidden="true">
+                    <source src="assets/works/work1poster.mp4" type="video/mp4" />
+                  </video>
+                  <!-- Subtle hover cue -->
+                  <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100">
+                    <div class="absolute right-3 top-3 rounded-md bg-black/40 px-2 py-1 text-xs text-white/85">Visit ↗</div>
+                  </div>
+                </a>
+                <!-- Bottom info bar inside white panel -->
+                <div class="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 bg-white/90 px-4 py-3 text-ink/90 backdrop-blur-sm border-t border-black/10">
+                  <div class="flex items-center gap-3">
+                    <span class="select-none text-xl font-bold text-ink/40">01</span>
+                    <h3 class="text-base sm:text-lg font-semibold">FlowEdge — Landing Page</h3>
+                  </div>
+                  <a href="https://shadow-monarch007.github.io/FlowEdge/pages/landing_page.html" target="_blank" rel="noreferrer" class="text-sm text-ink/70 hover:text-ink">Live ↗</a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 2 -->
+            <article id="work-2" class="stack-card overflow-hidden rounded-2xl bg-black ring-1 ring-white/10 p-3 sm:p-4 md:p-6">
+              <div class="work-panel relative h-full w-full md:w-[92%] md:ml-auto rounded-[24px] bg-white text-ink ring-1 ring-black/10 shadow-xl overflow-hidden">
+                <a href="https://latteulove.framer.website/" target="_blank" rel="noreferrer" class="absolute inset-0 block group">
+                  <video class="work-preview absolute inset-0 h-full w-full object-cover md:object-right" muted playsinline loop autoplay preload="metadata" poster="assets/works/work2poster.png" aria-hidden="true">
+                    <source src="assets/works/work2.mp4" type="video/mp4" />
+                  </video>
+                  <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100">
+                    <div class="absolute right-3 top-3 rounded-md bg-black/40 px-2 py-1 text-xs text-white/85">Visit ↗</div>
+                  </div>
+                </a>
+                <div class="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 bg-white/90 px-4 py-3 text-ink/90 backdrop-blur-sm border-t border-black/10">
+                  <div class="flex items-center gap-3">
+                    <span class="select-none text-xl font-bold text-ink/40">02</span>
+                    <h3 class="text-base sm:text-lg font-semibold">Commerce UI — Checkout</h3>
+                  </div>
+                  <a href="https://latteulove.framer.website/" target="_blank" rel="noreferrer" class="text-sm text-ink/70 hover:text-ink">Live ↗</a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 3 -->
+            <article id="work-3" class="stack-card overflow-hidden rounded-2xl bg-black ring-1 ring-white/10 p-3 sm:p-4 md:p-6">
+              <div class="work-panel relative h-full w-full md:w-[92%] md:ml-auto rounded-[24px] bg-white text-ink ring-1 ring-black/10 shadow-xl overflow-hidden">
+                <a href="#" class="absolute inset-0 block group" aria-label="Open Realtime Chat">
+                  <video class="work-preview absolute inset-0 h-full w-full object-cover md:object-right" muted playsinline loop autoplay preload="metadata" poster="assets/works/workposter3.png" aria-hidden="true">
+                    <source src="assets/works/work3.mp4" type="video/mp4" />
+                  </video>
+                  <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100">
+                    <div class="absolute right-3 top-3 rounded-md bg-black/40 px-2 py-1 text-xs text-white/85">Open ↗</div>
+                  </div>
+                </a>
+                <div class="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 bg-white/90 px-4 py-3 text-ink/90 backdrop-blur-sm border-t border-black/10">
+                  <div class="flex items-center gap-3">
+                    <span class="select-none text-xl font-bold text-ink/40">03</span>
+                    <h3 class="text-base sm:text-lg font-semibold">Automation Agency</h3>
+                  </div>
+                  <a href="#" class="text-sm text-ink/70 hover:text-ink">Repo ↗</a>
+                </div>
+              </div>
+            </article>
+              </div>
+            </div>
+          </div>
+
+          <div class="pb-20"></div>
+        </div>
+      </section>
+
+  <!-- Stacked panels B: Skills -> About (separate group) -->
+  <div id="panelStackB" class="stack-section">
+  <!-- Skills / About split -->
+  <section id="skills" class="relative bg-black text-white stack-card">
+        <div class="mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-8">
+          <div class="grid gap-10 py-16 md:grid-cols-2">
+            <div>
+              <div class="text-[18vw] leading-[0.9] text-white/80 sm:text-[14vw] md:text-[10vw] lg:text-[8vw] font-extrabold tracking-tight">
+                <div>DEVELOPER</div>
+                <div>DESIGNER</div>
+                <div>CREATOR<span class="text-white/60">.</span></div>
+              </div>
+            </div>
+            <div class="grid gap-8 sm:grid-cols-2">
+              <div>
+                <h3 class="mb-3 text-2xl font-semibold">Languages & Tools</h3>
+                <ul class="space-y-2 text-white/80">
+                  <li>JavaScript, TypeScript</li>
+                  <li>Python</li>
+                  <li>SQL</li>
+                  <li>Git</li>
+                  <li>Postman</li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="mb-3 text-2xl font-semibold">Frameworks & Libraries</h3>
+                <ul class="space-y-2 text-white/80">
+                  <li>React, Next.js</li>
+                  <li>Node.js, Express</li>
+                  <li>Tailwind CSS, GSAP</li>
+                  <li>Framer Motion</li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="mb-3 text-2xl font-semibold">Core CS Concepts</h3>
+                <ul class="space-y-2 text-white/80">
+                  <li>DSA</li>
+                  <li>OOP</li>
+                  <li>System Design</li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="mb-3 text-2xl font-semibold">ML/AI & Automation</h3>
+                <ul class="space-y-2 text-white/80">
+                  <li>TensorFlow, PyTorch</li>
+                  <li>scikit-learn, OpenCV</li>
+                  <li>LangChain, OpenAI API</li>
+                  <li>Zapier, Make (Integromat)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- About Me (before Contact) -->
+  <section id="about" class="relative bg-black text-white stack-card">
+        <div class="mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-8">
+          <div class="grid gap-10 py-16 md:grid-cols-2">
+            <div>
+              <h2 class="text-4xl font-extrabold tracking-tight">About Me</h2>
+              <p class="mt-4 text-white/75 leading-7 max-w-prose">
+                I’m Nachiketh J — a developer/designer who loves building clean, purposeful products. I focus on performance, accessibility, and thoughtful motion.
+              </p>
+              <p class="mt-3 text-white/70 leading-7 max-w-prose">
+                AIML graduate, web design & development enjoyer, and a bit of an AI nerd. I tinker with LLMs and tiny agents, automate boring stuff, and ship small things often.
+              </p>
+              <ul class="mt-6 grid gap-3 text-sm text-white/70 sm:grid-cols-2 max-w-xl">
+                <li class="border-t border-white/10 pt-2">Based in India</li>
+                <li class="border-t border-white/10 pt-2">Open to remote</li>
+                <li class="border-t border-white/10 pt-2">Web & Mobile</li>
+                <li class="border-t border-white/10 pt-2">Learning daily</li>
+                <li class="border-t border-white/10 pt-2">AI/ML Graduate</li>
+              </ul>
+              <div class="mt-8 max-w-xl text-white/70">
+                <div class="uppercase tracking-widest text-xs text-white/50 mb-2">Fun bits</div>
+                <ul class="list-disc pl-5 space-y-2">
+                  <li>Design first, then code — but I’m not shy about diving straight into a prototype.</li>
+                  <li>Favorite stack lately: Next.js, Tailwind, a sprinkle of GSAP, and clean API design.</li>
+                  <li>I care about micro-interactions that make people go “ooo, that’s nice”.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="justify-self-end">
+              <div class="h-80 w-[34rem] max-w-full overflow-hidden rounded-2xl bg-white/5 ring-1 ring-white/10 relative">
+                <img src="https://images.unsplash.com/photo-1550439062-609e1531270e?q=80&w=1600&auto=format&fit=crop" alt="Portrait / workspace" class="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
+              </div>
+            </div>
+          </div>
+        </div>
+  </section>
+  </div>
+
+      <!-- Contact -->
+      <section id="contact" class="relative bg-black text-white">
+        <div class="mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-8">
+          <div class="grid gap-10 py-16 md:grid-cols-2">
+            <div class="space-y-5">
+              <h2 class="text-4xl font-bold">Let’s build something great</h2>
+              <p class="text-white/70">Tell me about your project, timeline, and goals. I’ll get back within 1–2 business days.</p>
+              <div class="flex items-center gap-4 pt-1">
+                <!-- Mail -->
+                <a href="mailto:nachikethgowda1512@gmail.com" aria-label="Email" class="group inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 text-white hover:bg-white/15">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" class="opacity-90 group-hover:opacity-100"><path d="M4 6h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><path d="m4 7 8 6 8-6"/></svg>
+                </a>
+                <!-- GitHub -->
+                <a href="https://github.com/shadow-monarch007" target="_blank" rel="noreferrer" aria-label="GitHub" class="group inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 text-white hover:bg-white/15">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" class="opacity-90 group-hover:opacity-100"><path d="M12 .5a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.41-4.04-1.41-.55-1.4-1.35-1.77-1.35-1.77-1.1-.75.08-.74.08-.74 1.22.09 1.86 1.25 1.86 1.25 1.08 1.86 2.84 1.32 3.53 1.01.11-.79.42-1.32.77-1.63-2.67-.3-5.47-1.34-5.47-5.96 0-1.32.47-2.4 1.24-3.25-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.3 1.24a11.5 11.5 0 0 1 6 0c2.29-1.56 3.3-1.24 3.3-1.24.66 1.65.24 2.87.12 3.17.77.85 1.24 1.93 1.24 3.25 0 4.63-2.8 5.66-5.48 5.96.43.37.82 1.1.82 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 12 .5z"/></svg>
+                </a>
+                <!-- WhatsApp -->
+                <a href="https://wa.me/919108089386" target="_blank" rel="noreferrer" aria-label="WhatsApp" class="group inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 text-white hover:bg-white/15">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" class="opacity-90 group-hover:opacity-100"><path d="M20.52 3.48A11.89 11.89 0 0 0 12.07 0C5.5 0 .18 5.33.18 11.9c0 2.1.56 4.16 1.62 5.97L0 24l6.3-1.64a11.75 11.75 0 0 0 5.77 1.49h.01c6.56 0 11.89-5.33 11.89-11.9 0-3.18-1.24-6.17-3.45-8.47zM12.07 21.4h-.01a9.5 9.5 0 0 1-4.84-1.32l-.35-.21-3.74.97.99-3.64-.22-.37a9.52 9.52 0 0 1-1.44-5.04c0-5.25 4.28-9.53 9.54-9.53 2.55 0 4.94.99 6.74 2.8a9.43 9.43 0 0 1 2.79 6.75c0 5.25-4.28 9.53-9.5 9.53zm5.5-7.18c-.3-.15-1.79-.88-2.06-.98-.27-.1-.47-.15-.67.15-.2.3-.76.98-.93 1.18-.17.2-.34.23-.64.08-.3-.15-1.26-.46-2.4-1.46-.89-.79-1.49-1.76-1.66-2.06-.17-.3-.02-.47.13-.62.13-.13.3-.34.45-.51.15-.17.2-.3.3-.5.1-.2.05-.38-.03-.53-.08-.15-.67-1.6-.92-2.19-.24-.58-.48-.5-.67-.51h-.57c-.2 0-.53.08-.81.38-.27.3-1.06 1.04-1.06 2.54 0 1.5 1.09 2.95 1.24 3.15.15.2 2.14 3.27 5.18 4.58.72.31 1.28.49 1.72.63.72.23 1.38.2 1.9.12.58-.09 1.79-.73 2.04-1.43.25-.7.25-1.3.17-1.43-.08-.13-.27-.2-.57-.35z"/></svg>
+                </a>
+              </div>
+            </div>
+
+            <form id="contactForm" class="space-y-4">
+              <div>
+                <label for="name" class="mb-1 block text-sm text-white/80">Name</label>
+                <input id="name" name="name" type="text" required placeholder="Jane Doe" class="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent-500" />
+              </div>
+              <div>
+                <label for="email" class="mb-1 block text-sm text-white/80">Email</label>
+                <input id="email" name="email" type="email" required placeholder="jane@example.com" class="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent-500" />
+              </div>
+              <div>
+                <label for="message" class="mb-1 block text-sm text-white/80">Message</label>
+                <textarea id="message" name="message" rows="5" required placeholder="Tell me about your project..." class="w-full resize-y rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent-500"></textarea>
+              </div>
+              <div class="flex items-center gap-4">
+                <button type="submit" class="inline-flex items-center gap-2 rounded-md bg-accent-600 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-accent-500">Send Message</button>
+                <p id="formStatus" class="text-sm text-white/60"></p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-white/10 bg-black">
+      <div class="mx-auto flex max-w-[92rem] items-center justify-between px-4 py-8 text-xs text-white/50 lg:px-8">
+  <p>© <span id="year"></span> NACHIKETH J. All rights reserved.</p>
+        <p class="hidden sm:block">Built with Tailwind & GSAP</p>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+      const $ = (s, r=document) => r.querySelector(s);
+      const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+      // Motion config (easy to tune)
+      const MOTION = {
+        works: {
+          // per-panel scroll distance (affects how much you scroll to progress one transition)
+          perPanel: 1000,
+          // scrub tightness (seconds for smoothing) — smaller feels more responsive
+          scrub: 0.25,
+          // 360ms total transition, 120ms overlap start (≈ 33%)
+          dur: 0.36,
+          overlap: 0.12,
+          // movement/look
+          inY: 8, outY: -5, inScale: 1.015, outScale: 0.99, blur: 2,
+          useBlur: false,
+          // easing from the analysis (CSS cubic-bezier). We'll create a GSAP CustomEase below.
+          bezier: [0.22, 1, 0.36, 1]
+        },
+        nav: {
+          // switch threshold in px (50% of 1894px viewport used in the analysis)
+          switchPx: 947
+        }
+      };
+
+  // no header/nav; links are inline in hero
+
+      // Year & availability tag
+      $('#year').textContent = new Date().getFullYear();
+      (function(){
+        const d = new Date();
+        const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+        const year = String(d.getFullYear()).slice(-2);
+        const tag = `${month}'${year}`;
+        const el = document.getElementById('availTag');
+        if (el) el.textContent = tag;
+      })();
+
+      // Contact form -> mailto
+      const form = $('#contactForm');
+      const status = $('#formStatus');
+      form?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = $('#name')?.value?.trim();
+        const email = $('#email')?.value?.trim();
+        const message = $('#message')?.value?.trim();
+        if (!name || !email || !message) {
+          status.textContent = 'Please fill out all fields.';
+          status.className = 'text-sm text-red-400';
+          return;
+        }
+        const subject = encodeURIComponent(`Portfolio Inquiry from ${name}`);
+        const body = encodeURIComponent(`${message}\n\nFrom: ${name} <${email}>`);
+  const mailto = `mailto:nachikethgowda1512@gmail.com?subject=${subject}&body=${body}`;
+        status.textContent = 'Opening your email client...';
+        status.className = 'text-sm text-accent-300';
+        window.location.href = mailto;
+        setTimeout(() => {
+          status.textContent = 'If your email client didn\'t open, email nachikethgowda1512@gmail.com';
+          status.className = 'text-sm text-white/60';
+        }, 1200);
+        form.reset();
+      });
+
+      // GSAP animations
+      gsap.registerPlugin(ScrollTrigger);
+      if (window.CustomEase && MOTION.works?.bezier && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const [x1,y1,x2,y2] = MOTION.works.bezier;
+        CustomEase.create('bezierEase', `M0,0 C${x1},${y1} ${x2},${y2} 1,1`);
+      }
+
+      // no sticky header; no active link observer needed
+
+      // Hero entrance
+      gsap.from('#hero h1 span', { y: 40, autoAlpha: 0, duration: 0.8, ease: 'power3.out', stagger: 0.08, delay: 0.1 });
+      gsap.from('#hero p, #hero a', { y: 18, autoAlpha: 0, duration: 0.7, ease: 'power3.out', stagger: 0.08, delay: 0.2 });
+
+      // Hero contact toggle: playful knob nudge on click
+      (function(){
+        const btn = document.getElementById('contactToggle');
+        if (!btn) return;
+        const knob = btn.querySelector('.knob');
+        btn.addEventListener('click', () => {
+          if (!knob) return;
+          knob.style.transform = 'translateX(16px)';
+          setTimeout(() => { knob.style.transform = ''; }, 240);
+        });
+      })();
+
+      // Section headers (fire once for less work)
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  $$('#servicesIntro h2, #works h2').forEach((el) => {
+          ScrollTrigger.create({
+            trigger: el,
+            start: 'top 85%',
+            once: true,
+            onEnter: () => gsap.fromTo(
+              el,
+              { autoAlpha: 0, y: 24 },
+              { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' }
+            )
+          });
+        });
+      }
+
+      // Service rows stagger (fire once)
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        $$('#services [class*="grid grid-cols"]').forEach((row, i) => {
+          ScrollTrigger.create({
+            trigger: row,
+            start: 'top 85%',
+            once: true,
+            onEnter: () => gsap.from(row, { autoAlpha: 0, y: 20, duration: 0.5, ease: 'power2.out', delay: i * 0.04 })
+          });
+        });
+      }
+
+      // Stacked sections (no GSAP): optimized scroll handler for all .stack-section
+      (function(){
+        const sections = Array.from(document.querySelectorAll('.stack-section'));
+        if (!sections.length) return;
+
+        const data = sections.map(section => {
+          // only consider direct children cards to avoid nested stacks interfering
+          const cards = Array.from(section.children).filter(el => el.classList?.contains('stack-card'));
+          cards.forEach((c, i) => c.style.zIndex = String(100 + i));
+          const computeTops = () => cards.map(c => c.getBoundingClientRect().top + window.scrollY);
+          return { section, cards, tops: computeTops(), computeTops };
+        });
+
+        let ticking = false;
+        const update = () => {
+          ticking = false;
+          const y = window.scrollY;
+          const focusY = y + window.innerHeight * 0.33; // choose a point inside the viewport
+          // 1) Prefer the section that contains the focus point
+          let nearest = null;
+          for (const d of data) {
+            const rect = d.section.getBoundingClientRect();
+            const top = rect.top + window.scrollY;
+            const bottom = rect.bottom + window.scrollY;
+            if (focusY >= top && focusY < bottom) { nearest = d; break; }
+          }
+          // 2) Fallback to closest section top if none contains focusY
+          if (!nearest) {
+            let nearestDist = Infinity;
+            const viewportTop = y + 1;
+            for (const d of data) {
+              const sectionTop = d.section.getBoundingClientRect().top + window.scrollY;
+              const dist = Math.abs(sectionTop - viewportTop);
+              if (dist < nearestDist) { nearest = d; nearestDist = dist; }
+            }
+          }
+
+          for (const d of data) {
+            const isNearest = d === nearest;
+            // active card is the last whose top <= y; -1 means not yet entered
+            let activeIdx = -1;
+            if (isNearest) {
+              for (let i = 0; i < d.tops.length; i++) {
+                if (d.tops[i] <= y) activeIdx = i; else break;
+              }
+            }
+            d.cards.forEach((c, i) => {
+              if (!isNearest || activeIdx === -1) {
+                c.classList.remove('is-active');
+                c.classList.remove('is-past');
+              } else if (i < activeIdx) {
+                c.classList.add('is-past');
+                c.classList.remove('is-active');
+              } else if (i === activeIdx) {
+                c.classList.add('is-active');
+                c.classList.remove('is-past');
+              } else {
+                c.classList.remove('is-active');
+                c.classList.remove('is-past');
+              }
+            });
+          }
+        };
+        const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+  const onResize = () => { data.forEach(d => d.tops = d.computeTops()); onScroll(); };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onResize);
+  window.addEventListener('DOMContentLoaded', onResize);
+  // initial
+  onResize();
+      })();
+
+      // Autoplay/pause work preview videos when their card is active & visible (observe cards for more reliable visibility)
+      (function(){
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const saveData = navigator.connection && navigator.connection.saveData;
+        const canPlay = () => !prefersReduced && !saveData;
+
+        const stack = document.getElementById('stackWorks');
+        if (!stack) return;
+        const cards = Array.from(stack.querySelectorAll('.stack-card'));
+        const videos = cards.map(c => c.querySelector('.work-preview')).filter(Boolean);
+        if (!videos.length) return;
+
+        // Track card visibility ratios
+        const cardVisible = new Map(cards.map(c => [c, 0]));
+
+        const tryPlayPause = (card) => {
+          const v = card.querySelector('.work-preview');
+          if (!v) return;
+          const visible = (cardVisible.get(card) || 0) >= 0.1; // be lenient
+          const active = card.classList.contains('is-active');
+          if (!canPlay()) { v.pause?.(); return; }
+          if (active && visible) {
+            if (v.readyState >= 2) v.play().catch(() => {});
+            else v.addEventListener('loadeddata', () => v.play().catch(() => {}), { once: true });
+          } else {
+            v.pause?.();
+          }
+        };
+
+        // Observe cards instead of videos for visibility
+        const cardIO = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            const card = entry.target;
+            cardVisible.set(card, entry.isIntersecting ? entry.intersectionRatio : 0);
+            tryPlayPause(card);
+          });
+        }, { threshold: [0, 0.1, 0.25, 0.5, 1] });
+        cards.forEach(c => cardIO.observe(c));
+
+        // React to active class changes
+        const mo = new MutationObserver(muts => {
+          for (const m of muts) {
+            if (m.type === 'attributes' && m.attributeName === 'class' && m.target.classList.contains('stack-card')) {
+              tryPlayPause(m.target);
+            }
+          }
+        });
+        cards.forEach(c => mo.observe(c, { attributes: true, attributeFilter: ['class'] }));
+
+        // Try once metadata is ready
+        videos.forEach(v => {
+          v.addEventListener('loadedmetadata', () => {
+            const card = v.closest('.stack-card');
+            if (card) tryPlayPause(card);
+          });
+          // Show a subtle fallback badge if video fails (keeps poster visible)
+          v.addEventListener('error', () => {
+            const wrap = v.parentElement || v.closest('.relative') || v.closest('.stack-card');
+            if (!wrap || wrap.querySelector('.video-fallback-badge')) return;
+            const badge = document.createElement('div');
+            badge.className = 'video-fallback-badge absolute right-3 top-3 rounded-md bg-black/40 px-2 py-1 text-xs text-white/85';
+            badge.textContent = 'Preview unavailable';
+            wrap.appendChild(badge);
+          }, { once: true });
+        });
+
+        // Pause when tab hidden
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) videos.forEach(v => v.pause?.());
+        });
+      })();
+
+      // Works left-side nav: smooth scroll + active highlight sync
+      (function(){
+        const stack = document.getElementById('stackWorks');
+        const nav = document.getElementById('workNav');
+        if (!stack || !nav) return;
+        const cards = Array.from(stack.querySelectorAll('.stack-card'));
+        const items = Array.from(nav.querySelectorAll('.work-nav-item'));
+        const gotoCard = (i) => {
+          const card = cards[i]; if (!card) return;
+          const y = card.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({ top: y + 1, behavior: 'smooth' });
+        };
+        items.forEach(btn => btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const i = Number(btn.dataset.idx);
+          gotoCard(i);
+        }));
+        const sync = () => {
+          const activeIdx = cards.findIndex(c => c.classList.contains('is-active'));
+          if (activeIdx >= 0) {
+            items.forEach(el => el.classList.remove('is-current'));
+            items[activeIdx]?.classList.add('is-current');
+          }
+        };
+        const mo = new MutationObserver(sync);
+        cards.forEach(c => mo.observe(c, { attributes: true, attributeFilter: ['class'] }));
+        // initial
+        sync();
+      })();
+
+      // Note: Removed unused floating animation targeting .work-card to avoid idle CPU usage.
+      
+      // Site-wide: scroll progress bar + scroll-to-top button
+      (function(){
+        const bar = document.getElementById('scrollbar');
+        const toTop = document.getElementById('toTop');
+        if (!bar || !toTop) return;
+        const update = () => {
+          const h = document.documentElement;
+          const scrolled = h.scrollTop || document.body.scrollTop;
+          const max = (h.scrollHeight - h.clientHeight) || 1;
+          const pct = Math.min(1, Math.max(0, scrolled / max));
+          bar.style.width = `${pct * 100}%`;
+          if (scrolled > h.clientHeight * 0.8) toTop.classList.add('is-visible'); else toTop.classList.remove('is-visible');
+        };
+        window.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        update();
+        toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      })();
+    </script>
+  </body>
+</html>
