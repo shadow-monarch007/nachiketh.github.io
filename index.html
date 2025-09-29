@@ -2,7 +2,7 @@
 <html lang="en" class="scroll-smooth">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>NACHIKETH J — Portfolio</title>
   <meta name="description" content="NACHIKETH J — Web Developer & Designer. Services, works, skills, about, contact." />
 
@@ -63,9 +63,16 @@
       @media (prefers-reduced-motion: reduce) {
         #stackWorks .stack-card { transition: none !important; }
       }
-  /* Mobile-friendly card sizing */
+  /* Mobile-first: disable sticky stacking to avoid clipping and lag */
   @media (max-width: 640px) {
-    .stack-section .stack-card { height: 82vh; margin-bottom: 14vh; }
+    .stack-section .stack-card {
+      position: static;
+      height: auto;
+      margin-bottom: 1.75rem;
+      transform: none !important;
+      opacity: 1 !important;
+      filter: none !important;
+    }
   }
   /* Works left nav highlight */
   .work-nav-item { display:block; text-align:left; font-weight:800; line-height: .9; font-size: clamp(28px, 6vw, 72px); opacity: 0.6; transition: color .2s, opacity .2s, transform .2s; }
@@ -77,6 +84,12 @@
     .group:hover .work-preview { transform: scale(1.02); }
     .work-panel { transition: transform 250ms var(--ease-b), box-shadow 250ms var(--ease-b); }
     .group:hover .work-panel { transform: translateY(-2px); box-shadow: 0 25px 40px -20px rgba(0,0,0,0.35); }
+
+    /* Turn off hover effects on touch devices to save GPU */
+    @media (hover: none), (pointer: coarse) {
+      .group:hover .work-preview { transform: none; }
+      .group:hover .work-panel { transform: none; box-shadow: none; }
+    }
 
     /* Scroll-to-top button visibility */
     #toTop { opacity: 0; pointer-events: none; transition: opacity .25s var(--ease-b), transform .25s var(--ease-b); transform: translateY(8px); }
@@ -131,7 +144,7 @@
             </nav>
           </div>
 
-          <h1 class="select-none leading-none tracking-tight font-extrabold text-ink will-change-transform whitespace-nowrap">
+          <h1 class="select-none leading-none tracking-tight font-extrabold text-ink will-change-transform whitespace-normal sm:whitespace-nowrap">
             <span class="block text-[18vw]  sm:text-[16vw] md:text-[12.5vw] lg:text-[10.5vw]">NACHIKETH J</span>
           </h1>
 
@@ -159,7 +172,7 @@
             </div>
           </div>
           <!-- bottom-right availability overlay -->
-          <div class="pointer-events-none absolute right-6 md:right-10 lg:right-20 bottom-6 md:bottom-8 text-right z-0">
+          <div class="pointer-events-none absolute right-6 md:right-10 lg:right-20 bottom-6 md:bottom-8 text-right z-0 hidden sm:block">
             <div class="text-[11px] md:text-xs tracking-widest text-ink/60 uppercase">AVAILABLE FOR WORK</div>
             <div id="availTag" class="leading-[0.88] font-extrabold text-ink text-[16vw] sm:text-[12vw] md:text-[10vw] lg:text-[8.5vw]">JUN'25</div>
           </div>
@@ -579,9 +592,12 @@
         form.reset();
       });
 
-      // GSAP animations
+      // Environment flags
+      const isMobile = window.matchMedia('(max-width: 640px)').matches;
+
+      // GSAP animations (gate on mobile to reduce jank)
       gsap.registerPlugin(ScrollTrigger);
-      if (window.CustomEase && MOTION.works?.bezier && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (!isMobile && window.CustomEase && MOTION.works?.bezier && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         const [x1,y1,x2,y2] = MOTION.works.bezier;
         CustomEase.create('bezierEase', `M0,0 C${x1},${y1} ${x2},${y2} 1,1`);
       }
@@ -589,8 +605,10 @@
       // no sticky header; no active link observer needed
 
       // Hero entrance
-      gsap.from('#hero h1 span', { y: 40, autoAlpha: 0, duration: 0.8, ease: 'power3.out', stagger: 0.08, delay: 0.1 });
-      gsap.from('#hero p, #hero a', { y: 18, autoAlpha: 0, duration: 0.7, ease: 'power3.out', stagger: 0.08, delay: 0.2 });
+      if (!isMobile) {
+        gsap.from('#hero h1 span', { y: 40, autoAlpha: 0, duration: 0.8, ease: 'power3.out', stagger: 0.08, delay: 0.1 });
+        gsap.from('#hero p, #hero a', { y: 18, autoAlpha: 0, duration: 0.7, ease: 'power3.out', stagger: 0.08, delay: 0.2 });
+      }
 
       // Hero contact toggle: playful knob nudge on click
       (function(){
@@ -605,7 +623,7 @@
       })();
 
       // Section headers (fire once for less work)
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (!isMobile && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   $$('#servicesIntro h2, #works h2').forEach((el) => {
           ScrollTrigger.create({
             trigger: el,
@@ -621,7 +639,7 @@
       }
 
       // Service rows stagger (fire once)
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (!isMobile && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         $$('#services [class*="grid grid-cols"]').forEach((row, i) => {
           ScrollTrigger.create({
             trigger: row,
@@ -636,6 +654,9 @@
       (function(){
         const sections = Array.from(document.querySelectorAll('.stack-section'));
         if (!sections.length) return;
+
+        // On small screens, cards are normal flow; skip sticky engine to prevent jank
+        if (isMobile) return;
 
         const data = sections.map(section => {
           // only consider direct children cards to avoid nested stacks interfering
@@ -708,13 +729,28 @@
       (function(){
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const saveData = navigator.connection && navigator.connection.saveData;
-        const canPlay = () => !prefersReduced && !saveData;
+        const canPlay = () => !prefersReduced && !saveData && !isMobile;
 
         const stack = document.getElementById('stackWorks');
         if (!stack) return;
         const cards = Array.from(stack.querySelectorAll('.stack-card'));
         const videos = cards.map(c => c.querySelector('.work-preview')).filter(Boolean);
         if (!videos.length) return;
+
+        // On mobile or save-data: stop loading video sources to avoid bandwidth/lag
+        if (isMobile || saveData) {
+          videos.forEach(v => {
+            try { v.pause?.(); } catch(_){}
+            const sources = Array.from(v.querySelectorAll('source'));
+            sources.forEach(s => {
+              if (!s.dataset.src) s.dataset.src = s.src;
+              s.src = '';
+            });
+            // reload to apply empty sources (poster will still show)
+            try { v.load?.(); } catch(_){}
+          });
+          return; // No autoplay logic on mobile
+        }
 
         // Track card visibility ratios
         const cardVisible = new Map(cards.map(c => [c, 0]));
