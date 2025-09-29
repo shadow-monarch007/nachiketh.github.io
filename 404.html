@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>404 — Page not found</title>
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#f2e9e1">
+    <style>
+      :root { color-scheme: light dark; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        display: grid; place-items: center; gap: 1rem;
+        background: #f9f6f2; color: #1f2937;
+      }
+      .card {
+        background: white; border-radius: 16px; padding: 24px 28px; max-width: 560px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        text-align: center;
+      }
+      h1 { font-size: 1.5rem; margin: 0 0 0.5rem; }
+      p { margin: 0 0 1rem; line-height: 1.5; }
+      a.button {
+        display: inline-block; padding: 10px 16px; border-radius: 999px; text-decoration: none;
+        background: #111827; color: #fff;
+      }
+      .muted { color: #6b7280; font-size: 0.875rem; }
+    </style>
+    <script>
+      // Redirect unknown paths back to the homepage
+      (function() {
+        try {
+          var target = window.location.origin + "/";
+          // Use replace to avoid creating an extra history entry
+          window.location.replace(target);
+        } catch (_) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Page not found</h1>
+      <p>The page you’re looking for doesn’t exist. Taking you back home…</p>
+      <p><a class="button" href="/">Go to homepage</a></p>
+      <p class="muted">If you’re not redirected automatically, use the button above.</p>
+    </div>
+  </body>
+  </html>
