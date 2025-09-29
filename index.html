@@ -72,7 +72,13 @@
       transform: none !important;
       opacity: 1 !important;
       filter: none !important;
+      overflow: visible !important;
     }
+    /* Ensure hero headings and long words wrap nicely */
+    #hero h1 { line-height: 1.05 !important; }
+    h1, h2, h3, p { overflow-wrap: anywhere; word-break: break-word; }
+    /* Give work panels an intrinsic height so absolute children don't collapse */
+    .work-panel { aspect-ratio: 16 / 9; min-height: 220px; }
   }
   /* Works left nav highlight */
   .work-nav-item { display:block; text-align:left; font-weight:800; line-height: .9; font-size: clamp(28px, 6vw, 72px); opacity: 0.6; transition: color .2s, opacity .2s, transform .2s; }
