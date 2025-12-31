@@ -29,7 +29,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/CustomEase.min.js"></script>
 
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23134e4a'/%3E%3Ctext x='50' y='58' font-size='52' text-anchor='middle' fill='%23fff' font-family='Segoe UI, Roboto, Arial, sans-serif'%3EN%3C/text%3E%3C/svg%3E" />
-  <meta name="theme-color" content="#0d9488" />
+  <meta name="theme-color" content="#EFF0EA" />
   <link rel="canonical" href="https://nachiketh.me/" />
     <style>
       .tilt { transform-style: preserve-3d; perspective: 1000px; }
@@ -63,22 +63,27 @@
       @media (prefers-reduced-motion: reduce) {
         #stackWorks .stack-card { transition: none !important; }
       }
-  /* Mobile-first: disable sticky stacking to avoid clipping and lag */
+  /* Mobile-first: Adapt stacking instead of disabling it */
   @media (max-width: 640px) {
     .stack-section .stack-card {
-      position: static;
-      height: auto;
-      margin-bottom: 1.75rem;
-      transform: none !important;
-      opacity: 1 !important;
-      filter: none !important;
-      overflow: visible !important;
+      /* Keep sticky but adjust for mobile viewport */
+      position: sticky;
+      top: 0;
+      height: auto; /* Allow content to dictate height, but min-height ensures presence */
+      min-height: 100dvh; /* Full viewport height on mobile */
+      margin-bottom: 0; /* Remove bottom margin on mobile to prevent gaps */
+      /* Re-enable transforms */
+      transform-origin: center top;
+      transition: transform 400ms var(--ease-b), opacity 400ms var(--ease-b), filter 400ms var(--ease-b);
+      /* Ensure content isn't cut off */
+      overflow-y: auto;
+      overflow-x: hidden;
     }
-    /* Ensure hero headings and long words wrap nicely */
+    /* Adjust hero text for mobile */
     #hero h1 { line-height: 1.05 !important; }
     h1, h2, h3, p { overflow-wrap: anywhere; word-break: break-word; }
-    /* Give work panels an intrinsic height so absolute children don't collapse */
-    .work-panel { aspect-ratio: 16 / 9; min-height: 220px; }
+    /* Ensure work panels fit */
+    .work-panel { aspect-ratio: auto; min-height: 300px; }
   }
   /* Works left nav highlight */
   .work-nav-item { display:block; text-align:left; font-weight:800; line-height: .9; font-size: clamp(28px, 6vw, 72px); opacity: 0.6; transition: color .2s, opacity .2s, transform .2s; }
@@ -91,6 +96,17 @@
     .work-panel { transition: transform 250ms var(--ease-b), box-shadow 250ms var(--ease-b); }
     .group:hover .work-panel { transform: translateY(-2px); box-shadow: 0 25px 40px -20px rgba(0,0,0,0.35); }
 
+    /* Blob Animation */
+    @keyframes blob {
+      0% { transform: translate(0px, 0px) scale(1); }
+      33% { transform: translate(30px, -50px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.9); }
+      100% { transform: translate(0px, 0px) scale(1); }
+    }
+    .animate-blob { animation: blob 7s infinite; }
+    .animation-delay-2000 { animation-delay: 2s; }
+    .animation-delay-4000 { animation-delay: 4s; }
+
     /* Turn off hover effects on touch devices to save GPU */
     @media (hover: none), (pointer: coarse) {
       .group:hover .work-preview { transform: none; }
@@ -100,10 +116,34 @@
     /* Scroll-to-top button visibility */
     #toTop { opacity: 0; pointer-events: none; transition: opacity .25s var(--ease-b), transform .25s var(--ease-b); transform: translateY(8px); }
     #toTop.is-visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+    /* Custom Cursor */
+    @media (pointer: fine) {
+      body { cursor: none; }
+      #cursor { position: fixed; top: 0; left: 0; width: 20px; height: 20px; border: 1px solid #ffffff; border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s, background-color 0.3s, opacity 0.3s; mix-blend-mode: difference; opacity: 0; }
+      #cursor.hovered { width: 50px; height: 50px; background-color: #ffffff; border-color: transparent; mix-blend-mode: difference; }
+    }
     </style>
   </head>
 
   <body class="bg-black text-white antialiased selection:bg-accent-500/30 overflow-x-hidden">
+    <!-- Custom Cursor -->
+    <div id="cursor" class="hidden md:block"></div>
+
+    <!-- Noise Texture (Hidden on mobile for performance) -->
+    <div class="fixed inset-0 z-[50] pointer-events-none opacity-[0.04] mix-blend-overlay hidden md:block" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenu" class="fixed inset-0 z-[10000] bg-sand text-ink transform translate-x-full transition-transform duration-500 ease-in-out flex flex-col justify-center items-center sm:hidden">
+      <nav class="flex flex-col gap-8 text-4xl font-bold text-center">
+        <a href="#services" class="mobile-link hover:text-accent-600 transition-colors">Services</a>
+        <a href="#works" class="mobile-link hover:text-accent-600 transition-colors">Works</a>
+        <a href="#about" class="mobile-link hover:text-accent-600 transition-colors">About</a>
+        <a href="#contact" class="mobile-link hover:text-accent-600 transition-colors">Contact</a>
+      </nav>
+      <div class="absolute bottom-10 text-sm font-medium opacity-50">NACHIKETH J</div>
+    </div>
+
     <!-- Scroll progress bar + ToTop button -->
     <div id="scrollbar" class="fixed left-0 top-0 h-[3px] bg-accent-500/80 w-0 z-[9999]"></div>
     <button id="toTop" type="button" aria-label="Scroll to top" class="fixed bottom-6 right-6 z-[9999] rounded-full bg-accent-600 text-black font-semibold shadow-lg px-4 py-2 text-sm hover:bg-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-400">Top ↑</button>
@@ -135,10 +175,18 @@
   <div id="panelStack" class="stack-section">
   <!-- Hero (light) as panel card -->
   <section id="hero" class="relative bg-sand text-ink stack-card overflow-hidden">
-        <div class="mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-8 relative z-10">
           <article class="overflow-hidden">
           <div class="py-10 sm:py-14 md:py-16 flex items-center justify-between">
             <p class="text-sm font-medium text-ink/70">Web Developer & Designer</p>
+            <!-- Mobile Menu Toggle -->
+            <button id="mobileMenuBtn" class="sm:hidden relative z-[10001] p-2 -mr-2 text-ink focus:outline-none" aria-label="Toggle menu">
+              <div class="w-6 h-5 flex flex-col justify-between">
+                <span class="w-full h-0.5 bg-current transition-transform duration-300 origin-left"></span>
+                <span class="w-full h-0.5 bg-current transition-opacity duration-300"></span>
+                <span class="w-full h-0.5 bg-current transition-transform duration-300 origin-left"></span>
+              </div>
+            </button>
             <nav class="text-[0.95rem] font-semibold hidden sm:block">
               <a href="#services" class="text-ink visited:text-ink transition-colors hover:text-accent-700">Services</a>
               <span class="mx-2 text-ink/50">•</span>
@@ -150,38 +198,58 @@
             </nav>
           </div>
 
-          <h1 class="select-none leading-none tracking-tight font-extrabold text-ink will-change-transform whitespace-normal sm:whitespace-nowrap">
-            <span class="block text-[18vw]  sm:text-[16vw] md:text-[12.5vw] lg:text-[10.5vw]">NACHIKETH J</span>
+          <h1 id="heroTitle" class="select-none leading-none tracking-tight font-extrabold text-ink will-change-transform whitespace-normal sm:whitespace-nowrap text-[14vw] sm:text-[16vw] md:text-[12.5vw] lg:text-[10.5vw]">
+            <span class="whitespace-nowrap inline-block"><span class="inline-block">N</span><span class="inline-block">A</span><span class="inline-block">C</span><span class="inline-block">H</span><span class="inline-block">I</span><span class="inline-block">K</span><span class="inline-block">E</span><span class="inline-block">T</span><span class="inline-block">H</span></span> <span class="inline-block text-accent-600">J</span>
           </h1>
 
           <div class="mt-6 grid items-start gap-8 pb-16 sm:grid-cols-2 sm:gap-12 md:pb-20">
-            <div class="space-y-6">
+            <div class="space-y-8">
               <div class="inline-flex h-8 w-8 items-center justify-center text-[#7b7e6b]">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 12h12M12 5l7 7-7 7"/></svg>
               </div>
               <p class="max-w-xl text-[18px] leading-7 text-ink/80">
                 Open to opportunities worldwide. Passionate about building polished, intuitive, and thoughtful digital experiences that leave a mark.
               </p>
-              <a href="#contact" id="contactToggle" class="mt-4 group inline-flex items-center gap-3 rounded-full bg-accent-600 pr-4 pl-2 py-2 text-[15px] font-semibold text-black shadow-sm ring-1 ring-black/10 transition hover:bg-accent-500 w-max">
-                <span class="toggle-track relative inline-flex h-6 w-10 items-center rounded-full bg-black/20 ring-1 ring-black/20">
-                  <span class="knob inline-block h-5 w-5 rounded-full bg-black transition-transform translate-x-0 group-hover:translate-x-4"></span>
-                </span>
-                Contact me
-              </a>
               
+              <a href="#contact" class="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-ink px-8 py-4 text-white transition-all hover:bg-accent-600 hover:text-ink">
+                <span class="relative font-semibold">Let's talk</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="relative transition-transform group-hover:translate-x-1"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+
+              <!-- Mobile Availability Indicator -->
+              <div class="sm:hidden mt-6 flex items-center gap-2 text-ink/60">
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                <span class="text-sm font-medium tracking-wide uppercase">Available for work</span>
+              </div>
             </div>
 
-            <div class="justify-self-center sm:justify-self-end">
-              <div class="h-[23rem] w-[30rem] max-w-full overflow-hidden rounded-2xl bg-white/70 shadow-sm ring-1 ring-black/10 relative z-10 mt-2 sm:mt-0">
-                <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop" alt="Aesthetic developer workspace" class="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
-              </div>
+            <div class="justify-self-center sm:justify-self-end relative w-full max-w-md h-0 sm:h-[18rem] flex items-center justify-center">
+               <!-- Abstract Floating Shapes Removed -->
             </div>
           </div>
           <!-- bottom-right availability overlay -->
-          <div class="pointer-events-none absolute right-6 md:right-10 lg:right-20 bottom-6 md:bottom-8 text-right z-0 hidden sm:block">
+          <div class="pointer-events-none absolute right-6 md:right-10 lg:right-20 bottom-20 md:bottom-16 text-right z-0 hidden sm:block">
             <div class="text-[11px] md:text-xs tracking-widest text-ink/60 uppercase">AVAILABLE FOR WORK</div>
-            <div id="availTag" class="leading-[0.88] font-extrabold text-ink text-[16vw] sm:text-[12vw] md:text-[10vw] lg:text-[8.5vw]">JUN'25</div>
+            <div id="availTag" class="leading-[0.88] font-extrabold text-ink text-[16vw] sm:text-[12vw] md:text-[10vw] lg:text-[8.5vw]">DEC'25</div>
           </div>
+
+          <!-- Scroll Indicator -->
+          <div class="absolute bottom-10 left-1/2 -translate-x-1/2 hidden sm:flex flex-col items-center gap-2 text-ink/40">
+            <span class="text-[10px] uppercase tracking-widest">Scroll</span>
+            <div class="h-12 w-[1px] bg-ink/20 overflow-hidden">
+              <div class="h-full w-full bg-ink/60 animate-scroll-line"></div>
+            </div>
+          </div>
+          <style>
+            @keyframes scrollLine {
+              0% { transform: translateY(-100%); }
+              100% { transform: translateY(100%); }
+            }
+            .animate-scroll-line { animation: scrollLine 2s cubic-bezier(0.77, 0, 0.175, 1) infinite; }
+          </style>
       </article>
         </div>
   </section>
@@ -208,7 +276,7 @@
           <div class="py-10 sm:py-12 md:py-14">
             <div id="stackServices" class="stack-section">
               <!-- Card 1 -->
-              <article class="stack-card overflow-hidden rounded-2xl bg-black ring-1 ring-white/10">
+              <article class="stack-card overflow-y-auto rounded-2xl bg-black ring-1 ring-white/10">
                 <div class="grid h-full grid-rows-[1fr_auto]">
                   <div class="p-6 sm:p-8 md:p-12">
                     <div class="md:grid md:grid-cols-12 md:gap-10">
@@ -235,7 +303,7 @@
               </article>
 
               <!-- Card 2 -->
-              <article class="stack-card overflow-hidden rounded-2xl bg-black ring-1 ring-white/10">
+              <article class="stack-card overflow-y-auto rounded-2xl bg-black ring-1 ring-white/10">
                 <div class="grid h-full grid-rows-[1fr_auto]">
                   <div class="p-6 sm:p-8 md:p-12">
                     <div class="md:grid md:grid-cols-12 md:gap-10">
@@ -262,7 +330,7 @@
               </article>
 
               <!-- Card 3 -->
-              <article class="stack-card overflow-hidden rounded-2xl bg-black ring-1 ring-white/10">
+              <article class="stack-card overflow-y-auto rounded-2xl bg-black ring-1 ring-white/10">
                 <div class="grid h-full grid-rows-[1fr_auto]">
                   <div class="p-6 sm:p-8 md:p-12">
                     <div class="md:grid md:grid-cols-12 md:gap-10">
@@ -307,79 +375,262 @@
                 <button class="work-nav-item is-current" data-idx="0" type="button">01 →</button>
                 <button class="work-nav-item" data-idx="1" type="button">02 →</button>
                 <button class="work-nav-item" data-idx="2" type="button">03 →</button>
+                <button class="work-nav-item" data-idx="3" type="button">04 →</button>
+                <button class="work-nav-item" data-idx="4" type="button">05 →</button>
+                <button class="work-nav-item" data-idx="5" type="button">06 →</button>
+                <button class="work-nav-item" data-idx="6" type="button">07 →</button>
               </div>
             </aside>
 
             <!-- Right stacked cards -->
             <div class="col-span-12 md:col-span-9">
               <div id="stackWorks" class="stack-section">
-            <!-- Card 1 -->
-            <article id="work-1" class="stack-card overflow-hidden rounded-2xl bg-black ring-1 ring-white/10 p-3 sm:p-4 md:p-6">
-              <div class="work-panel relative h-full w-full md:w-[92%] md:ml-auto rounded-[24px] bg-white text-ink ring-1 ring-black/10 shadow-xl overflow-hidden">
-                <!-- Clickable video preview: FlowEdge live link + local preview assets -->
-                <a href="https://shadow-monarch007.github.io/FlowEdge/pages/landing_page.html" target="_blank" rel="noreferrer" class="absolute inset-0 block group">
-                  <video class="work-preview absolute inset-0 h-full w-full object-cover md:object-right" muted playsinline loop autoplay preload="metadata" poster="assets/works/work1.png" aria-hidden="true">
-                    <source src="assets/works/work1poster.mp4" type="video/mp4" />
-                  </video>
-                  <!-- Subtle hover cue -->
-                  <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100">
-                    <div class="absolute right-3 top-3 rounded-md bg-black/40 px-2 py-1 text-xs text-white/85">Visit ↗</div>
+                <!-- Card 1: Sevorse (AI Agency) -->
+                <article id="work-1" class="stack-card sticky top-0 h-[70vh] w-full origin-top transition-all duration-500 will-change-transform">
+                  <div class="work-panel group relative h-full w-full overflow-hidden rounded-3xl bg-zinc-950 ring-1 ring-white/10">
+                    <a href="https://shadow-monarch007.github.io/FlowEdge/pages/landing_page.html" target="_blank" rel="noreferrer" class="block h-full w-full">
+                      <div class="absolute inset-0 h-full w-full">
+                        <video class="work-preview h-full w-full object-contain bg-zinc-950 transition-transform duration-700 group-hover:scale-105" muted playsinline loop preload="metadata" poster="assets/works/work1poster.png">
+                          <source src="assets/works/work1.mp4" type="video/mp4" />
+                        </video>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-60"></div>
+                      </div>
+                      
+                      <div class="absolute inset-x-0 bottom-0 p-6 sm:p-10 md:p-12">
+                        <div class="flex items-end justify-between gap-6">
+                          <div class="space-y-2 transform transition-transform duration-500 group-hover:-translate-y-2">
+                            <div class="flex items-center gap-3 text-accent-400">
+                              <span class="font-mono text-sm font-bold tracking-wider">01</span>
+                              <span class="h-px w-6 bg-accent-400/50"></span>
+                              <span class="text-xs font-bold uppercase tracking-widest text-white/80">AI Automation Agency</span>
+                            </div>
+                            <h3 class="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">Sevorse</h3>
+                            <p class="max-w-md text-lg text-white/70 opacity-0 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 hidden sm:block">
+                              Streamlining business operations with custom AI agents and intelligent workflow automation.
+                            </p>
+                          </div>
+                          
+                          <div class="group/btn flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-white/10 backdrop-blur-md transition-all duration-300 group-hover:bg-accent-500 group-hover:text-black">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300 group-hover/btn:-translate-y-1 group-hover/btn:translate-x-1"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                          </div>
+                        </div>
+                      </div>
+                    </a>
                   </div>
-                </a>
-                <!-- Bottom info bar inside white panel -->
-                <div class="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 bg-white/90 px-4 py-3 text-ink/90 backdrop-blur-sm border-t border-black/10">
-                  <div class="flex items-center gap-3">
-                    <span class="select-none text-xl font-bold text-ink/40">01</span>
-                    <h3 class="text-base sm:text-lg font-semibold">FlowEdge — Landing Page</h3>
-                  </div>
-                  <a href="https://shadow-monarch007.github.io/FlowEdge/pages/landing_page.html" target="_blank" rel="noreferrer" class="text-sm text-ink/70 hover:text-ink">Live ↗</a>
-                </div>
-              </div>
-            </article>
+                </article>
 
-            <!-- Card 2 -->
-            <article id="work-2" class="stack-card overflow-hidden rounded-2xl bg-black ring-1 ring-white/10 p-3 sm:p-4 md:p-6">
-              <div class="work-panel relative h-full w-full md:w-[92%] md:ml-auto rounded-[24px] bg-white text-ink ring-1 ring-black/10 shadow-xl overflow-hidden">
-                <a href="https://latteulove.framer.website/" target="_blank" rel="noreferrer" class="absolute inset-0 block group">
-                  <video class="work-preview absolute inset-0 h-full w-full object-cover md:object-right" muted playsinline loop autoplay preload="metadata" poster="assets/works/work2poster.png" aria-hidden="true">
-                    <source src="assets/works/work2.mp4" type="video/mp4" />
-                  </video>
-                  <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100">
-                    <div class="absolute right-3 top-3 rounded-md bg-black/40 px-2 py-1 text-xs text-white/85">Visit ↗</div>
+                <!-- Card 2: Cafe Website -->
+                <article id="work-2" class="stack-card sticky top-0 h-[70vh] w-full origin-top transition-all duration-500 will-change-transform">
+                  <div class="work-panel group relative h-full w-full overflow-hidden rounded-3xl bg-zinc-950 ring-1 ring-white/10">
+                    <a href="https://latteulove.framer.website/" target="_blank" rel="noreferrer" class="block h-full w-full">
+                      <div class="absolute inset-0 h-full w-full">
+                        <video class="work-preview h-full w-full object-contain bg-zinc-950 transition-transform duration-700 group-hover:scale-105" muted playsinline loop preload="metadata" poster="assets/works/work2poster.png">
+                          <source src="assets/works/work2.mp4" type="video/mp4" />
+                        </video>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-60"></div>
+                      </div>
+                      
+                      <div class="absolute inset-x-0 bottom-0 p-6 sm:p-10 md:p-12">
+                        <div class="flex items-end justify-between gap-6">
+                          <div class="space-y-2 transform transition-transform duration-500 group-hover:-translate-y-2">
+                            <div class="flex items-center gap-3 text-accent-400">
+                              <span class="font-mono text-sm font-bold tracking-wider">02</span>
+                              <span class="h-px w-6 bg-accent-400/50"></span>
+                              <span class="text-xs font-bold uppercase tracking-widest text-white/80">Artisan Coffee House</span>
+                            </div>
+                            <h3 class="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">Bean & Brew</h3>
+                            <p class="max-w-md text-lg text-white/70 opacity-0 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 hidden sm:block">
+                              A cozy digital presence for a local roastery, featuring a seamless menu and reservation system.
+                            </p>
+                          </div>
+                          
+                          <div class="group/btn flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-white/10 backdrop-blur-md transition-all duration-300 group-hover:bg-accent-500 group-hover:text-black">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300 group-hover/btn:-translate-y-1 group-hover/btn:translate-x-1"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                          </div>
+                        </div>
+                      </div>
+                    </a>
                   </div>
-                </a>
-                <div class="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 bg-white/90 px-4 py-3 text-ink/90 backdrop-blur-sm border-t border-black/10">
-                  <div class="flex items-center gap-3">
-                    <span class="select-none text-xl font-bold text-ink/40">02</span>
-                    <h3 class="text-base sm:text-lg font-semibold">Commerce UI — Checkout</h3>
-                  </div>
-                  <a href="https://latteulove.framer.website/" target="_blank" rel="noreferrer" class="text-sm text-ink/70 hover:text-ink">Live ↗</a>
-                </div>
-              </div>
-            </article>
+                </article>
 
-            <!-- Card 3 -->
-            <article id="work-3" class="stack-card overflow-hidden rounded-2xl bg-black ring-1 ring-white/10 p-3 sm:p-4 md:p-6">
-              <div class="work-panel relative h-full w-full md:w-[92%] md:ml-auto rounded-[24px] bg-white text-ink ring-1 ring-black/10 shadow-xl overflow-hidden">
-                <a href="#" class="absolute inset-0 block group" aria-label="Open Realtime Chat">
-                  <video class="work-preview absolute inset-0 h-full w-full object-cover md:object-right" muted playsinline loop autoplay preload="metadata" poster="assets/works/workposter3.png" aria-hidden="true">
-                    <source src="assets/works/work3.mp4" type="video/mp4" />
-                  </video>
-                  <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100">
-                    <div class="absolute right-3 top-3 rounded-md bg-black/40 px-2 py-1 text-xs text-white/85">Open ↗</div>
+                <!-- Card 3: IncredibleKarnataka -->
+                <article id="work-3" class="stack-card sticky top-0 h-[70vh] w-full origin-top transition-all duration-500 will-change-transform">
+                  <div class="work-panel group relative h-full w-full overflow-hidden rounded-3xl bg-zinc-950 ring-1 ring-white/10">
+                    <a href="#" class="block h-full w-full">
+                      <div class="absolute inset-0 h-full w-full">
+                        <video class="work-preview h-full w-full object-contain bg-zinc-950 transition-transform duration-700 group-hover:scale-105" muted playsinline loop preload="metadata" poster="assets/works/work3poster.png">
+                          <source src="assets/works/work3.mp4" type="video/mp4" />
+                        </video>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-60"></div>
+                      </div>
+                      
+                      <div class="absolute inset-x-0 bottom-0 p-6 sm:p-10 md:p-12">
+                        <div class="flex items-end justify-between gap-6">
+                          <div class="space-y-2 transform transition-transform duration-500 group-hover:-translate-y-2">
+                            <div class="flex items-center gap-3 text-accent-400">
+                              <span class="font-mono text-sm font-bold tracking-wider">03</span>
+                              <span class="h-px w-6 bg-accent-400/50"></span>
+                              <span class="text-xs font-bold uppercase tracking-widest text-white/80">Travel & Tourism</span>
+                            </div>
+                            <h3 class="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">Incredible Karnataka</h3>
+                            <p class="max-w-md text-lg text-white/70 opacity-0 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 hidden sm:block">
+                              Curated travel experiences showcasing the heritage, nature, and culture of Karnataka.
+                            </p>
+                          </div>
+                          
+                          <div class="group/btn flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-white/10 backdrop-blur-md transition-all duration-300 group-hover:bg-accent-500 group-hover:text-black">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300 group-hover/btn:-translate-y-1 group-hover/btn:translate-x-1"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                          </div>
+                        </div>
+                      </div>
+                    </a>
                   </div>
-                </a>
-                <div class="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 bg-white/90 px-4 py-3 text-ink/90 backdrop-blur-sm border-t border-black/10">
-                  <div class="flex items-center gap-3">
-                    <span class="select-none text-xl font-bold text-ink/40">03</span>
-                    <h3 class="text-base sm:text-lg font-semibold">Automation Agency</h3>
+                </article>
+
+                <!-- Card 4: Madhu Masala -->
+                <article id="work-4" class="stack-card sticky top-0 h-[70vh] w-full origin-top transition-all duration-500 will-change-transform">
+                  <div class="work-panel group relative h-full w-full overflow-hidden rounded-3xl bg-zinc-950 ring-1 ring-white/10">
+                    <a href="#" class="block h-full w-full">
+                      <div class="absolute inset-0 h-full w-full">
+                        <video class="work-preview h-full w-full object-contain bg-zinc-950 transition-transform duration-700 group-hover:scale-105" muted playsinline loop preload="metadata" poster="assets/works/work4poster.png">
+                          <source src="assets/works/work4.mp4" type="video/mp4" />
+                        </video>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-60"></div>
+                      </div>
+                      
+                      <div class="absolute inset-x-0 bottom-0 p-6 sm:p-10 md:p-12">
+                        <div class="flex items-end justify-between gap-6">
+                          <div class="space-y-2 transform transition-transform duration-500 group-hover:-translate-y-2">
+                            <div class="flex items-center gap-3 text-accent-400">
+                              <span class="font-mono text-sm font-bold tracking-wider">04</span>
+                              <span class="h-px w-6 bg-accent-400/50"></span>
+                              <span class="text-xs font-bold uppercase tracking-widest text-white/80">Spice E-commerce</span>
+                            </div>
+                            <h3 class="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">Madhu Masala</h3>
+                            <p class="max-w-md text-lg text-white/70 opacity-0 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 hidden sm:block">
+                              Authentic, hand-ground spice blends delivered globally. A flavorful D2C shopping experience.
+                            </p>
+                          </div>
+                          
+                          <div class="group/btn flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-white/10 backdrop-blur-md transition-all duration-300 group-hover:bg-accent-500 group-hover:text-black">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300 group-hover/btn:-translate-y-1 group-hover/btn:translate-x-1"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                          </div>
+                        </div>
+                      </div>
+                    </a>
                   </div>
-                  <a href="#" class="text-sm text-ink/70 hover:text-ink">Repo ↗</a>
-                </div>
-              </div>
-            </article>
+                </article>
+
+                <!-- Card 5: Apex Elevators -->
+                <article id="work-5" class="stack-card sticky top-0 h-[70vh] w-full origin-top transition-all duration-500 will-change-transform">
+                  <div class="work-panel group relative h-full w-full overflow-hidden rounded-3xl bg-zinc-950 ring-1 ring-white/10">
+                    <a href="#" class="block h-full w-full">
+                      <div class="absolute inset-0 h-full w-full">
+                        <video class="work-preview h-full w-full object-contain bg-zinc-950 transition-transform duration-700 group-hover:scale-105" muted playsinline loop preload="metadata" poster="assets/works/work5poster.png">
+                          <source src="assets/works/work5.mp4" type="video/mp4" />
+                        </video>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-60"></div>
+                      </div>
+                      
+                      <div class="absolute inset-x-0 bottom-0 p-6 sm:p-10 md:p-12">
+                        <div class="flex items-end justify-between gap-6">
+                          <div class="space-y-2 transform transition-transform duration-500 group-hover:-translate-y-2">
+                            <div class="flex items-center gap-3 text-accent-400">
+                              <span class="font-mono text-sm font-bold tracking-wider">05</span>
+                              <span class="h-px w-6 bg-accent-400/50"></span>
+                              <span class="text-xs font-bold uppercase tracking-widest text-white/80">Industrial Manufacturing</span>
+                            </div>
+                            <h3 class="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">Apex Elevators</h3>
+                            <p class="max-w-md text-lg text-white/70 opacity-0 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 hidden sm:block">
+                              Corporate showcase for vertical transportation solutions, emphasizing safety and engineering.
+                            </p>
+                          </div>
+                          
+                          <div class="group/btn flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-white/10 backdrop-blur-md transition-all duration-300 group-hover:bg-accent-500 group-hover:text-black">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300 group-hover/btn:-translate-y-1 group-hover/btn:translate-x-1"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                </article>
+
+                <!-- Card 6: Lumina Studio -->
+                <article id="work-6" class="stack-card sticky top-0 h-[70vh] w-full origin-top transition-all duration-500 will-change-transform">
+                  <div class="work-panel group relative h-full w-full overflow-hidden rounded-3xl bg-zinc-950 ring-1 ring-white/10">
+                    <a href="#" class="block h-full w-full">
+                      <div class="absolute inset-0 h-full w-full">
+                        <video class="work-preview h-full w-full object-contain bg-zinc-950 transition-transform duration-700 group-hover:scale-105" muted playsinline loop preload="metadata" poster="assets/works/work6poster.png">
+                          <source src="assets/works/work6.mp4" type="video/mp4" />
+                        </video>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-60"></div>
+                      </div>
+                      
+                      <div class="absolute inset-x-0 bottom-0 p-6 sm:p-10 md:p-12">
+                        <div class="flex items-end justify-between gap-6">
+                          <div class="space-y-2 transform transition-transform duration-500 group-hover:-translate-y-2">
+                            <div class="flex items-center gap-3 text-accent-400">
+                              <span class="font-mono text-sm font-bold tracking-wider">06</span>
+                              <span class="h-px w-6 bg-accent-400/50"></span>
+                              <span class="text-xs font-bold uppercase tracking-widest text-white/80">Photography Portfolio</span>
+                            </div>
+                            <h3 class="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">Lumina Studio</h3>
+                            <p class="max-w-md text-lg text-white/70 opacity-0 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 hidden sm:block">
+                              A minimalist visual gallery capturing light, shadow, and emotion in every frame.
+                            </p>
+                          </div>
+                          
+                          <div class="group/btn flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-white/10 backdrop-blur-md transition-all duration-300 group-hover:bg-accent-500 group-hover:text-black">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300 group-hover/btn:-translate-y-1 group-hover/btn:translate-x-1"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                </article>
+
+                <!-- Card 7: NexTech -->
+                <article id="work-7" class="stack-card sticky top-0 h-[70vh] w-full origin-top transition-all duration-500 will-change-transform">
+                  <div class="work-panel group relative h-full w-full overflow-hidden rounded-3xl bg-zinc-950 ring-1 ring-white/10">
+                    <a href="#" class="block h-full w-full">
+                      <div class="absolute inset-0 h-full w-full">
+                        <video class="work-preview h-full w-full object-contain bg-zinc-950 transition-transform duration-700 group-hover:scale-105" muted playsinline loop preload="metadata" poster="assets/works/work7poster.png">
+                          <source src="assets/works/work7.mp4" type="video/mp4" />
+                        </video>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-60"></div>
+                      </div>
+                      
+                      <div class="absolute inset-x-0 bottom-0 p-6 sm:p-10 md:p-12">
+                        <div class="flex items-end justify-between gap-6">
+                          <div class="space-y-2 transform transition-transform duration-500 group-hover:-translate-y-2">
+                            <div class="flex items-center gap-3 text-accent-400">
+                              <span class="font-mono text-sm font-bold tracking-wider">07</span>
+                              <span class="h-px w-6 bg-accent-400/50"></span>
+                              <span class="text-xs font-bold uppercase tracking-widest text-white/80">SaaS & Digital Agency</span>
+                            </div>
+                            <h3 class="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">NexTech</h3>
+                            <p class="max-w-md text-lg text-white/70 opacity-0 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 hidden sm:block">
+                              Scaling digital products with data-driven strategies and cutting-edge software development.
+                            </p>
+                          </div>
+                          
+                          <div class="group/btn flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-white/10 backdrop-blur-md transition-all duration-300 group-hover:bg-accent-500 group-hover:text-black">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300 group-hover/btn:-translate-y-1 group-hover/btn:translate-x-1"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                </article>
               </div>
             </div>
+          </div>
+
+          <div class="mt-12 flex justify-center">
+            <a href="https://github.com/shadow-monarch007?tab=repositories" target="_blank" rel="noreferrer" class="group inline-flex items-center gap-3 rounded-full bg-white/10 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/20">
+              View All Projects
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover:translate-x-1"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
           </div>
 
           <div class="pb-20"></div>
@@ -388,10 +639,66 @@
 
   <!-- Stacked panels B: Skills -> About (separate group) -->
   <div id="panelStackB" class="stack-section">
+    <!-- Process Section -->
+    <section id="process" class="relative bg-black text-white stack-card overflow-y-auto">
+      <div class="mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-8">
+        <div class="py-10">
+          <h2 class="scramble-text mb-8 text-[10vw] sm:text-[8vw] md:text-[6vw] font-extrabold tracking-tight text-white/90">MY PROCESS<span class="text-white/60">.</span></h2>
+          
+          <div class="grid gap-6 md:grid-cols-3">
+            <!-- Step 1 -->
+            <div class="group relative overflow-hidden rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 transition-colors hover:bg-white/10">
+              <div class="mb-3 text-3xl font-bold text-accent-500">01</div>
+              <h3 class="mb-2 text-xl font-bold">Discovery</h3>
+              <p class="text-sm text-white/70">Understanding your goals, target audience, and requirements. We define the scope and success metrics together.</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="group relative overflow-hidden rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 transition-colors hover:bg-white/10">
+              <div class="mb-3 text-3xl font-bold text-accent-500">02</div>
+              <h3 class="mb-2 text-xl font-bold">Design & Strategy</h3>
+              <p class="text-sm text-white/70">Wireframing, prototyping, and visual design. Creating a user experience that aligns with your brand identity.</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="group relative overflow-hidden rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 transition-colors hover:bg-white/10">
+              <div class="mb-3 text-3xl font-bold text-accent-500">03</div>
+              <h3 class="mb-2 text-xl font-bold">Development</h3>
+              <p class="text-sm text-white/70">Clean, scalable code. Building the frontend and backend with a focus on performance and accessibility.</p>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="group relative overflow-hidden rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 transition-colors hover:bg-white/10">
+              <div class="mb-3 text-3xl font-bold text-accent-500">04</div>
+              <h3 class="mb-2 text-xl font-bold">Testing</h3>
+              <p class="text-sm text-white/70">Rigorous testing across devices and browsers. Ensuring everything works perfectly before the big reveal.</p>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="group relative overflow-hidden rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 transition-colors hover:bg-white/10">
+              <div class="mb-3 text-3xl font-bold text-accent-500">05</div>
+              <h3 class="mb-2 text-xl font-bold">Launch & Support</h3>
+              <p class="text-sm text-white/70">Deployment and post-launch support. I stick around to ensure your project continues to run smoothly.</p>
+            </div>
+             <!-- Step 6 -->
+             <div class="group relative overflow-hidden rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 transition-colors hover:bg-white/10 flex items-center justify-center">
+               <div class="text-center">
+                 <h3 class="text-xl font-bold mb-2">Ready to start?</h3>
+                 <a href="#contact" class="inline-flex items-center gap-2 text-accent-400 hover:text-accent-300 font-semibold">
+                   Let's talk
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                 </a>
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   <!-- Skills / About split -->
-  <section id="skills" class="relative bg-black text-white stack-card">
+  <section id="skills" class="relative bg-black text-white stack-card overflow-y-auto">
         <div class="mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-8">
-          <div class="grid gap-10 py-16 md:grid-cols-2">
+          <div class="grid gap-10 py-10 sm:py-16 md:grid-cols-2">
             <div>
               <div class="text-[18vw] leading-[0.9] text-white/80 sm:text-[14vw] md:text-[10vw] lg:text-[8vw] font-extrabold tracking-tight">
                 <div>DEVELOPER</div>
@@ -442,9 +749,9 @@
       </section>
 
       <!-- About Me (before Contact) -->
-  <section id="about" class="relative bg-black text-white stack-card">
+  <section id="about" class="relative bg-black text-white stack-card overflow-y-auto">
         <div class="mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-8">
-          <div class="grid gap-10 py-16 md:grid-cols-2">
+          <div class="grid gap-10 py-10 sm:py-16 md:grid-cols-2">
             <div>
               <h2 class="text-4xl font-extrabold tracking-tight">About Me</h2>
               <p class="mt-4 text-white/75 leading-7 max-w-prose">
@@ -469,8 +776,8 @@
                 </ul>
               </div>
             </div>
-            <div class="justify-self-end">
-              <div class="h-80 w-[34rem] max-w-full overflow-hidden rounded-2xl bg-white/5 ring-1 ring-white/10 relative">
+            <div class="justify-self-end w-full sm:w-auto">
+              <div class="h-64 sm:h-80 w-full sm:w-[34rem] max-w-full overflow-hidden rounded-2xl bg-white/5 ring-1 ring-white/10 relative">
                 <img src="https://images.unsplash.com/photo-1550439062-609e1531270e?q=80&w=1600&auto=format&fit=crop" alt="Portrait / workspace" class="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
               </div>
             </div>
@@ -611,25 +918,71 @@
       // no sticky header; no active link observer needed
 
       // Hero entrance
-      if (!isMobile) {
-        gsap.from('#hero h1 span', { y: 40, autoAlpha: 0, duration: 0.8, ease: 'power3.out', stagger: 0.08, delay: 0.1 });
-        gsap.from('#hero p, #hero a', { y: 18, autoAlpha: 0, duration: 0.7, ease: 'power3.out', stagger: 0.08, delay: 0.2 });
-      }
+      // if (!isMobile) { // Enable on mobile for "wow" factor
+        gsap.from('#hero h1 span', { 
+          y: 100, 
+          autoAlpha: 0, 
+          rotateX: -90,
+          duration: 1, 
+          ease: 'power4.out', 
+          stagger: 0.05, 
+          delay: 0.1 
+        });
+        gsap.from('#hero p, #hero a', { y: 20, autoAlpha: 0, duration: 0.8, ease: 'power3.out', stagger: 0.1, delay: 0.6 });
+      // }
 
-      // Hero contact toggle: playful knob nudge on click
-      (function(){
-        const btn = document.getElementById('contactToggle');
-        if (!btn) return;
-        const knob = btn.querySelector('.knob');
-        btn.addEventListener('click', () => {
-          if (!knob) return;
-          knob.style.transform = 'translateX(16px)';
-          setTimeout(() => { knob.style.transform = ''; }, 240);
+      // Custom Cursor Logic
+      (function() {
+        const cursor = document.getElementById('cursor');
+        if (!cursor || isMobile) return;
+        
+        let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+        let cursorX = window.innerWidth / 2, cursorY = window.innerHeight / 2;
+        let isVisible = false;
+        
+        document.addEventListener('mousemove', (e) => {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+          if (!isVisible) {
+            isVisible = true;
+            cursor.style.opacity = '1';
+          }
+        });
+
+        document.addEventListener('mouseleave', () => {
+          isVisible = false;
+          cursor.style.opacity = '0';
+        });
+
+        document.addEventListener('mouseenter', () => {
+          isVisible = true;
+          cursor.style.opacity = '1';
+        });
+        
+        const animateCursor = () => {
+          const dx = mouseX - cursorX;
+          const dy = mouseY - cursorY;
+          
+          cursorX += dx * 0.2;
+          cursorY += dy * 0.2;
+          
+          cursor.style.left = `${cursorX}px`;
+          cursor.style.top = `${cursorY}px`;
+          
+          requestAnimationFrame(animateCursor);
+        };
+        animateCursor();
+        
+        // Hover effects
+        const hoverables = document.querySelectorAll('a, button, .stack-card');
+        hoverables.forEach(el => {
+          el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+          el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
         });
       })();
 
       // Section headers (fire once for less work)
-      if (!isMobile && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   $$('#servicesIntro h2, #works h2').forEach((el) => {
           ScrollTrigger.create({
             trigger: el,
@@ -645,7 +998,7 @@
       }
 
       // Service rows stagger (fire once)
-      if (!isMobile && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         $$('#services [class*="grid grid-cols"]').forEach((row, i) => {
           ScrollTrigger.create({
             trigger: row,
@@ -662,7 +1015,7 @@
         if (!sections.length) return;
 
         // On small screens, cards are normal flow; skip sticky engine to prevent jank
-        if (isMobile) return;
+        // if (isMobile) return; // ENABLED FOR MOBILE
 
         const data = sections.map(section => {
           // only consider direct children cards to avoid nested stacks interfering
@@ -735,7 +1088,7 @@
       (function(){
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const saveData = navigator.connection && navigator.connection.saveData;
-        const canPlay = () => !prefersReduced && !saveData && !isMobile;
+        const canPlay = () => !prefersReduced && !saveData; // Allow mobile if no data saver
 
         const stack = document.getElementById('stackWorks');
         if (!stack) return;
@@ -743,8 +1096,8 @@
         const videos = cards.map(c => c.querySelector('.work-preview')).filter(Boolean);
         if (!videos.length) return;
 
-        // On mobile or save-data: stop loading video sources to avoid bandwidth/lag
-        if (isMobile || saveData) {
+        // On save-data: stop loading video sources to avoid bandwidth/lag
+        if (saveData) {
           videos.forEach(v => {
             try { v.pause?.(); } catch(_){}
             const sources = Array.from(v.querySelectorAll('source'));
@@ -755,7 +1108,7 @@
             // reload to apply empty sources (poster will still show)
             try { v.load?.(); } catch(_){}
           });
-          return; // No autoplay logic on mobile
+          return; // No autoplay logic
         }
 
         // Track card visibility ratios
@@ -867,6 +1220,62 @@
         window.addEventListener('resize', update);
         update();
         toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      })();
+
+      // Hero Parallax
+      (function(){
+        const heroImg = document.querySelector('#hero img');
+        if(!heroImg) return;
+        window.addEventListener('scroll', () => {
+          const scrolled = window.scrollY;
+          if(scrolled < window.innerHeight) {
+            heroImg.style.transform = `translateY(${scrolled * 0.15}px)`;
+          }
+        }, { passive: true });
+      })();
+
+      // Mobile Menu Logic
+      (function(){
+        const btn = document.getElementById('mobileMenuBtn');
+        const menu = document.getElementById('mobileMenu');
+        const links = menu?.querySelectorAll('a');
+        
+        if (!btn || !menu) return;
+
+        let isOpen = false;
+
+        const toggleMenu = () => {
+          isOpen = !isOpen;
+          if (isOpen) {
+            menu.classList.remove('translate-x-full');
+            document.body.style.overflow = 'hidden';
+            // Animate hamburger to X
+            const spans = btn.querySelectorAll('span');
+            if(spans.length === 3) {
+                spans[0].style.transform = 'rotate(45deg) translate(5px, 6px)';
+                spans[1].style.opacity = '0';
+                spans[2].style.transform = 'rotate(-45deg) translate(5px, -6px)';
+            }
+          } else {
+            menu.classList.add('translate-x-full');
+            document.body.style.overflow = '';
+            // Reset hamburger
+            const spans = btn.querySelectorAll('span');
+            if(spans.length === 3) {
+                spans[0].style.transform = '';
+                spans[1].style.opacity = '1';
+                spans[2].style.transform = '';
+            }
+          }
+        };
+
+        btn.addEventListener('click', toggleMenu);
+
+        links?.forEach(link => {
+          link.addEventListener('click', () => {
+            toggleMenu();
+          });
+        });
       })();
     </script>
   </body>
